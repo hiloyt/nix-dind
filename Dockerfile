@@ -1,9 +1,5 @@
 FROM docker:18
 
-# Enable HTTPS support in wget and set nsswitch.conf to make resolution work within containers
-RUN apk add --no-cache --update openssl \
-  && echo hosts: dns files > /etc/nsswitch.conf
-
 # Download Nix and install it into the system.
 RUN wget https://nixos.org/releases/nix/nix-2.3.3/nix-2.3.3-x86_64-linux.tar.xz \
   && tar xf nix-2.3.3-x86_64-linux.tar.xz \
@@ -34,5 +30,5 @@ ENV \
     NIX_SSL_CERT_FILE=/nix/var/nix/profiles/default/etc/ssl/certs/ca-bundle.crt \
     NIX_PATH=/nix/var/nix/profiles/per-user/root/channels
     
-ENTRYPOINT ["docker-entrypoint.sh"]
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 CMD ["sh"]
