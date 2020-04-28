@@ -1,8 +1,11 @@
 FROM docker:18
 
+# Enable HTTPS support in wget.
+RUN apk add --no-cache --update openssl
+
 # Download Nix and install it into the system.
-RUN wget https://nixos.org/releases/nix/nix-2.3.3/nix-2.3.3-x86_64-linux.tar.xz \
-  && tar xf nix-2.3.3-x86_64-linux.tar.xz \
+RUN wget https://nixos.org/releases/nix/nix-2.3/nix-2.3-x86_64-linux.tar.xz \
+  && tar xf nix-2.3-x86_64-linux.tar.xz \
   && addgroup -g 30000 -S nixbld \
   && for i in $(seq 1 30); do adduser -S -D -h /var/empty -g "Nix build user $i" -u $((30000 + i)) -G nixbld nixbld$i ; done \
   && mkdir -m 0755 /etc/nix \
@@ -25,13 +28,9 @@ ONBUILD ENV \
 ENV \
     ENV=/etc/profile \
     USER=root \
-    PATH=/nix/var/nix/profiles/default/bin:/nix/var/nix/profiles/default/sbin:/bin:/sbin:/usr/bin:/usr/sbin \
+    PATH=/nix/var/nix/profiles/default/bin:/nix/var/nix/profiles/default/sbin:/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin/ \
     GIT_SSL_CAINFO=/nix/var/nix/profiles/default/etc/ssl/certs/ca-bundle.crt \
     NIX_SSL_CERT_FILE=/nix/var/nix/profiles/default/etc/ssl/certs/ca-bundle.crt \
     NIX_PATH=/nix/var/nix/profiles/per-user/root/channels
-    
-RUN chmod 777 /usr/local/bin/docker-entrypoint.sh \
-    && ln -s /usr/local/bin/docker-entrypoint.sh /
 
-ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
-CMD ["sh"]
+RUN apk add --no-cache ca-certificates
